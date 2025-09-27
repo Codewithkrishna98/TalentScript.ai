@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
-import { GridBackgroundDemo } from '@/components/ui/Background';
+
 
 
 // --- TypeScript Interfaces ---
