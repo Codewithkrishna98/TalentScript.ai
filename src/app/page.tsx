@@ -41,7 +41,7 @@ export default function HomePage() {
                     href="/create" 
                     className="inline-block bg-violet-400 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-lg hover:bg-red-400 transition-transform transform hover:scale-105 duration-300 ease-in-out"
                 >
-                    Let's Create
+                     Create now
                 </Link>
             </div>
         </div>
