@@ -32,7 +32,6 @@ export default function CreatePage() {
   const [jobType, setJobType] = useState<string>('Full-time');
 
   // --- State for UI and Data ---
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'questions'>('description');
@@ -41,7 +40,6 @@ export default function CreatePage() {
   // --- Form Submission Handler ---
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     setGeneratedContent(null);
 
@@ -55,11 +53,16 @@ export default function CreatePage() {
       });
       setGeneratedContent(response.data);
       setActiveTab('description');
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'An unexpected error occurred.';
+    } catch (err: unknown) { // ✅ FIXED: Changed 'any' to 'unknown'
+      let errorMessage = 'An unexpected error occurred.';
+      // Type guard to check if it's an Axios error
+      if (axios.isAxiosError(err)) {
+        errorMessage = err.response?.data?.error || err.message;
+      } else if (err instanceof Error) {
+        // Handle generic JavaScript errors
+        errorMessage = err.message;
+      }
       setError(errorMessage);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -146,9 +149,6 @@ export default function CreatePage() {
     doc.save(`${companyName}-${jobTitle}-Description.pdf`);
   };
   
-
-
-  
   const handleDownloadQuestionsPDF = () => {
     if (!generatedContent) return;
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
@@ -200,11 +200,10 @@ export default function CreatePage() {
     doc.save(`${jobTitle}-Interview-Questions.pdf`);
   };
 
-
   return (
     <div className="min-h-screen  bg-slate-800 text-gray-100">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      
+        
         
         <header className="text-center mb-12">
           <h1 className="text-5xl font-extrabold  leading-tight bg-gradient-to-r from-white via-gray-100  to-orange-500 text-transparent bg-clip-text font-heading">
@@ -250,8 +249,8 @@ export default function CreatePage() {
 
             <div className="sm:col-span-2 text-center mt-4">
               
-              <button type="submit" disabled={loading} className="w-full sm:w-auto px-10 py-3 bg-indigo-600 text-white rounded-md font-bold text-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-all duration-300  transform hover:scale-105 font-sans">
-                {loading ? 'Generating...' : '✨ Generate Content'}
+              <button type="submit" className="w-full sm:w-auto px-10 py-3 bg-indigo-600 text-white rounded-md font-bold text-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-all duration-300  transform hover:scale-105 font-sans">
+                ✨ Generate Content
               </button>
             </div>
           </form>
