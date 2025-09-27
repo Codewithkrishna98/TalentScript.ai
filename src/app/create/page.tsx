@@ -4,8 +4,6 @@ import { useState, FormEvent } from 'react';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 
-
-
 // --- TypeScript Interfaces ---
 interface InterviewQuestion {
   question: string;
@@ -36,12 +34,14 @@ export default function CreatePage() {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [activeTab, setActiveTab] = useState<'description' | 'questions'>('description');
   const [copyStatus, setCopyStatus] = useState<'Copy' | 'Copied!'>('Copy');
+  const [loading, setLoading] = useState<boolean>(false); // New loading state
 
   // --- Form Submission Handler ---
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setGeneratedContent(null);
+    setLoading(true); // Set loading to true when API call starts
 
     try {
       const response = await axios.post<GeneratedContent>('/api/generate', {
@@ -53,16 +53,16 @@ export default function CreatePage() {
       });
       setGeneratedContent(response.data);
       setActiveTab('description');
-    } catch (err: unknown) { // ✅ FIXED: Changed 'any' to 'unknown'
+    } catch (err: unknown) {
       let errorMessage = 'An unexpected error occurred.';
-      // Type guard to check if it's an Axios error
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.error || err.message;
       } else if (err instanceof Error) {
-        // Handle generic JavaScript errors
         errorMessage = err.message;
       }
       setError(errorMessage);
+    } finally {
+      setLoading(false); // Set loading to false when API call completes
     }
   };
 
@@ -250,15 +250,23 @@ export default function CreatePage() {
             <div className="sm:col-span-2 text-center mt-4">
               
               <button type="submit" className="w-full sm:w-auto px-10 py-3 bg-indigo-600 text-white rounded-md font-bold text-lg hover:bg-indigo-700 disabled:bg-gray-400 transition-all duration-300  transform hover:scale-105 font-sans">
-                ✨ Generate Content
+                 {loading ? 'Generating...' : '✨ Generate Content'}
               </button>
             </div>
           </form>
         </div>
         
-        {error && <div className="mt-8 max-w-3xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg"><p><strong>Error:</strong> {error}</p></div>}
+       
 
-        {generatedContent && (
+        {/* Error State */}
+        {error && (
+          <div className="mt-8 max-w-3xl mx-auto bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+            <p><strong>Error:</strong> {error}</p>
+          </div>
+        )}
+
+        {/* Generated Content */}
+        {generatedContent && !loading && (
           <div className="mt-12 max-w-4xl mx-auto">
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8" aria-label="Tabs">
