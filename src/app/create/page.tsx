@@ -55,7 +55,7 @@ export default function CreatePage() {
       });
       setGeneratedContent(response.data);
       setActiveTab('description');
-    } catch (err: unknown) {
+    } catch (err:any) {
       let errorMessage = 'An unexpected error occurred.';
       if (typeof err === 'object' && err !== null) {
         if ('response' in err && typeof (err as any).response?.data?.error === 'string') {
