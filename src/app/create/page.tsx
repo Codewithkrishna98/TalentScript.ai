@@ -55,8 +55,15 @@ export default function CreatePage() {
       });
       setGeneratedContent(response.data);
       setActiveTab('description');
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error || err.message || 'An unexpected error occurred.';
+    } catch (err: unknown) {
+      let errorMessage = 'An unexpected error occurred.';
+      if (typeof err === 'object' && err !== null) {
+        if ('response' in err && typeof (err as any).response?.data?.error === 'string') {
+          errorMessage = (err as any).response.data.error;
+        } else if ('message' in err && typeof (err as any).message === 'string') {
+          errorMessage = (err as any).message;
+        }
+      }
       setError(errorMessage);
     } finally {
       setLoading(false);
